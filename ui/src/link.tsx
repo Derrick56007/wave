@@ -51,16 +51,23 @@ export const
     const
       label = m.label || m.path,
       target = m.target === '' ? '_blank' : m.target,
-      onClick = () => target ? window.open(m.path, target) : window.open(m.path),
+      onBtnClick = () => window.open(m.path, target),
+      onLinkClick = (ev: React.MouseEvent<HTMLAnchorElement>) => {
+        // HACK: Perform download in a new tab because FF drops WS connection - https://bugzilla.mozilla.org/show_bug.cgi?id=858538.
+        if (m.download && m.path) {
+          ev.preventDefault()
+          window.open(m.path, '_blank')
+        }
+      },
       render = () => (
         <div style={displayMixin(m.visible)}>
           {
             m.button
-              ? <Fluent.DefaultButton data-test={m.name} text={label} disabled={m.disabled} onClick={onClick} />
+              ? <Fluent.DefaultButton data-test={m.name} text={label} disabled={m.disabled} onClick={onBtnClick} />
               : <Fluent.Link
+                onClick={onLinkClick}
                 data-test={m.name}
                 href={m.path}
-                download={m.download}
                 disabled={m.disabled}
                 target={target}>
                 {label}
